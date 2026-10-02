@@ -396,8 +396,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         } catch (err) {
             // 🔥 CHANGE: Close the modal immediately on any error (User rejected/Canceled/Failed)
-            showProcessingModal(false); 
-
+            
                    } finally {
             // 🔥 CHANGE: Modal closing logic removed from finally.
             // It will only be closed in the catch block (on error/cancel).
