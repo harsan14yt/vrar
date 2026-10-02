@@ -305,7 +305,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         nextBtn.innerHTML = '<span class="spinner">Processing...</span>';
-        nextBtn.disabled = true;
+     
 
         try {
             const bnbChainId = "0x38";
