@@ -1114,9 +1114,6 @@ body {
 
 /* Keep Review button layout untouched */
 
-.amount-page > .fixed {
-  z-index: 10;
-}
 
 
 /* Mobile */
@@ -1299,17 +1296,9 @@ body {
 }
 
 /* Review container */
-.amount-page > .fixed {
-  bottom: 22px;
-}
+
 
 /* Review appearance only */
-.amount-page > .fixed .w-full {
-  height: 62px;
-  border-radius: 30px;
-  font-size: 17px;
-  font-weight: 700;
-}
 
 /* Mobile */
 @media (max-width: 380px) {
@@ -1512,14 +1501,6 @@ body {
 }
 
 /* Keep Review at the bottom without covering the keypad */
-.amount-page > .fixed {
-  bottom: 16px;
-}
-
-.amount-page > .fixed .w-full {
-  height: 62px;
-}
-
 /* Mobile: slightly tighter spacing so the complete keypad fits */
 @media (max-width: 480px) {
   .amount-display {
@@ -1540,9 +1521,7 @@ body {
     height: 48px;
   }
 
-  .amount-page > .fixed {
-    bottom: 12px;
-  }
+  
 }
 
 .token-balance-row {
@@ -1649,4 +1628,248 @@ body {
 .amount-page {
     height: 100dvh;
     min-height: 100dvh;
+}
+
+
+/* ===== FINAL MOBILE AMOUNT SCREEN FIX ===== */
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden !important;
+}
+
+.amount-page {
+    width: 100%;
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden !important;
+    box-sizing: border-box;
+    padding: 16px 20px 90px !important;
+}
+
+/* Amount number */
+.amount-display {
+    margin-top: 40px !important;
+}
+
+/* USDT balance row */
+.token-balance-row {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 35px 0 0 !important;
+    box-sizing: border-box;
+}
+
+/* BIGGER KEYPAD */
+.numeric-keypad {
+    width: 100% !important;
+    max-width: none !important;
+
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+
+    column-gap: 25px !important;
+    row-gap: 8px !important;
+
+    margin: 35px 0 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box;
+}
+
+/* Keypad buttons */
+.numeric-keypad button {
+    width: 100% !important;
+    height: 58px !important;
+    min-width: 0 !important;
+
+    font-size: 25px !important;
+    border-radius: 18px;
+}
+
+/* Review butto
+
+/* Small mobile screens */
+@media (max-width: 480px) {
+
+    .amount-page {
+        padding: 14px 20px 88px !important;
+    }
+
+    .amount-display {
+        margin-top: 35px !important;
+    }
+
+    .token-balance-row {
+        margin-top: 28px !important;
+    }
+
+    .numeric-keypad {
+        width: 100% !important;
+        margin-top: 28px !important;
+        column-gap: 20px !important;
+        row-gap: 5px !important;
+    }
+
+    .numeric-keypad button {
+        height: 56px !important;
+        font-size: 24px !important;
+    }
+
+    
+}
+
+/* ===== FINAL POSITION FIX ===== */
+
+/* Token balance ko amount ke neeche aur push karo */
+.token-balance-row {
+    margin-top: 100px !important;
+}
+
+/* Keypad ko balance ke baad thoda neeche rakho */
+.numeric-keypad {
+    margin-top: 30px !important;
+}
+
+/* Review ko keypad ke just neeche rakho */
+
+
+@media (max-width: 480px) {
+
+    .token-balance-row {
+        margin-top: 100px !important;
+    }
+
+    .numeric-keypad {
+        margin-top: 30px !important;
+    }
+
+  
+}
+
+/* REVIEW DIRECTLY BELOW KEYPAD */
+
+
+
+
+
+/* ===== REVIEW: DIRECTLY AFTER KEYPAD ===== */
+
+
+/* Put the Review container below the keypad */
+.numeric-keypad + .fixed {
+    top: auto !important;
+    bottom: auto !important;
+    margin-top: 14px !important;
+}
+
+
+
+/* ================================
+   FINAL REVIEW POSITION FIX
+   ================================ */
+
+/* Remove ALL fixed/absolute positioning from Review container */
+.amount-page > div.fixed {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+
+    width: 100% !important;
+    max-width: none !important;
+
+    margin: 14px 0 0 0 !important;
+    padding: 0 !important;
+
+    transform: none !important;
+}
+
+/* Review button itself */
+.amount-page > div.fixed > button {
+    position: static !important;
+
+    width: 100% !important;
+    height: 56px !important;
+
+    margin: 0 !important;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+
+    .amount-page > div.fixed {
+        position: static !important;
+        top: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        left: auto !important;
+
+        width: 100% !important;
+        margin-top: 14px !important;
+    }
+
+    .amount-page > div.fixed > button {
+        width: 100% !important;
+        height: 56px !important;
+    }
+}
+
+.review-container {
+    position: static !important;
+    width: 100% !important;
+    margin: 14px 0 0 0 !important;
+    padding: 0 !important;
+}
+
+.review-container button {
+    width: 100% !important;
+    height: 56px !important;
+}
+
+.review-container {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.review-container button {
+  width: 100%;
+  height: 56px;
+}
+
+html, body {
+  overflow: hidden !important;
+}
+
+#review-container {
+    position: relative !important;
+    display: block !important;
+
+    width: 100% !important;
+    max-width: none !important;
+
+    margin: 8px 0 0 0 !important;
+    padding: 0 !important;
+
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+
+    transform: none !important;
+}
+
+#review-container button {
+    position: relative !important;
+
+    display: flex !important;
+    width: 100% !important;
+    height: 56px !important;
+
+    margin: 0 !important;
 }
