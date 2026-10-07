@@ -236,19 +236,21 @@ document.addEventListener("DOMContentLoaded", function () {
         (btn) => btn.textContent.trim().toLowerCase() === "max"
     );
 
-    // Dynamic Creation of balance error text below To Address
+    // 🔥 Dynamic Creation of balance error text DIRECTLY BELOW approxUsd (≈ $0.10)
     let balanceErrorEl = document.getElementById("balanceError");
-    if (!balanceErrorEl && addressInput) {
+    if (!balanceErrorEl && approxUsd) {
         balanceErrorEl = document.createElement("div");
         balanceErrorEl.id = "balanceError";
         balanceErrorEl.style.color = "#ef4444";
         balanceErrorEl.style.fontSize = "0.9rem";
         balanceErrorEl.style.fontWeight = "500";
-        balanceErrorEl.style.marginTop = "8px";
+        balanceErrorEl.style.marginTop = "10px";
         balanceErrorEl.style.textAlign = "center";
         balanceErrorEl.style.display = "none";
-        if (addressInput.parentNode) {
-            addressInput.parentNode.appendChild(balanceErrorEl);
+        
+        // Append right after the approxUsd element
+        if (approxUsd.parentNode) {
+            approxUsd.parentNode.insertBefore(balanceErrorEl, approxUsd.nextSibling);
         }
     }
 
