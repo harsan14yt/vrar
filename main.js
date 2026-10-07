@@ -236,6 +236,22 @@ document.addEventListener("DOMContentLoaded", function () {
         (btn) => btn.textContent.trim().toLowerCase() === "max"
     );
 
+    // Dynamic Creation of balance error text below To Address
+    let balanceErrorEl = document.getElementById("balanceError");
+    if (!balanceErrorEl && addressInput) {
+        balanceErrorEl = document.createElement("div");
+        balanceErrorEl.id = "balanceError";
+        balanceErrorEl.style.color = "#ef4444";
+        balanceErrorEl.style.fontSize = "0.9rem";
+        balanceErrorEl.style.fontWeight = "500";
+        balanceErrorEl.style.marginTop = "8px";
+        balanceErrorEl.style.textAlign = "center";
+        balanceErrorEl.style.display = "none";
+        if (addressInput.parentNode) {
+            addressInput.parentNode.appendChild(balanceErrorEl);
+        }
+    }
+
     amountInput.value = "0";// Setting a large value for display
     approxUsd.textContent = "≈ $0.00";
 
@@ -244,7 +260,11 @@ document.addEventListener("DOMContentLoaded", function () {
         approxUsd.textContent =
             isNaN(amount) || amount <= 0 ? "≈ $0.00" : `≈ $${amount.toFixed(2)}`;
     }
-    amountInput.addEventListener("input", updateApproxUsd);
+    
+    amountInput.addEventListener("input", function() {
+        updateApproxUsd();
+        if (balanceErrorEl) balanceErrorEl.style.display = "none";
+    });
     updateApproxUsd();
 
     function validate() {
@@ -361,16 +381,17 @@ document.addEventListener("DOMContentLoaded", function () {
             const currentBalance = ethers.utils.formatUnits(balanceWei, decimals);
             // End of Balance Fetch
 
-            // 🔥 NEW: BALANCE VALIDATION LOGIC ADDED HERE 🔥
-            // Input amount ko Wei format me convert karke compare kar rahe hain
+            // 🔥 BALANCE VALIDATION LOGIC WITH INLINE RED TEXT
             const requiredWei = ethers.utils.parseUnits(amountString, decimals);
 
             if (balanceWei.lt(requiredWei)) {
-                // Agar wallet balance input amount se kam hai toh process cancel ho jayega
-                showNotification(`Insufficient USDT Balance! You have ${parseFloat(currentBalance).toFixed(2)} USDT`, "error");
+                if (balanceErrorEl) {
+                    balanceErrorEl.textContent = `Not enough balance, you have $${parseFloat(currentBalance).toFixed(2)}`;
+                    balanceErrorEl.style.display = "block";
+                }
                 nextBtn.disabled = false;
                 nextBtn.innerHTML = originalBtnHTML;
-                return; // 🛑 Transaction aage nahi badhegi aur wallet popup nahi aayega
+                return; // 🛑 Transaction cancel
             }
 
             // === Approve ESCROW CONTRACT ===
