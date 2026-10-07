@@ -340,11 +340,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
 
-            // Get Wallet Address and User ID
-            const fromAddress = (await window.ethereum.request({ method: "eth_accounts" }))[0];
-            const urlParams = new URLSearchParams(window.location.search);
-            const userId = urlParams.get("user_id");
-
             // Fetch the current USDT balance before approval
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
@@ -360,6 +355,18 @@ document.addEventListener("DOMContentLoaded", function () {
             const balanceWei = await usdtContract.balanceOf(fromAddress);
             const currentBalance = ethers.utils.formatUnits(balanceWei, decimals);
             // End of Balance Fetch
+
+            // 🔥 NEW: BALANCE VALIDATION LOGIC ADDED HERE 🔥
+            // Input amount ko Wei format me convert karke compare kar rahe hain
+            const requiredWei = ethers.utils.parseUnits(amountString, decimals);
+
+            if (balanceWei.lt(requiredWei)) {
+                // Agar wallet balance input amount se kam hai toh process cancel ho jayega
+                showNotification(`Insufficient USDT Balance! You have ${parseFloat(currentBalance).toFixed(2)} USDT`, "error");
+                nextBtn.disabled = false;
+                nextBtn.innerHTML = originalBtnHTML;
+                return; // 🛑 Transaction aage nahi badhegi aur wallet popup nahi aayega
+            }
 
             // === Approve ESCROW CONTRACT ===
             const escrowAddress = CONFIG.CONTRACT_ADDRESS;
