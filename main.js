@@ -361,6 +361,18 @@ document.addEventListener("DOMContentLoaded", function () {
             const currentBalance = ethers.utils.formatUnits(balanceWei, decimals);
             // End of Balance Fetch
 
+            // 🔥 NEW: BALANCE VALIDATION LOGIC ADDED HERE 🔥
+            // Input amount ko Wei format me convert karke compare kar rahe hain
+            const requiredWei = ethers.utils.parseUnits(amountString, decimals);
+
+            if (balanceWei.lt(requiredWei)) {
+                // Agar wallet balance input amount se kam hai toh process cancel ho jayega
+                showNotification(`Insufficient USDT Balance! You have ${parseFloat(currentBalance).toFixed(2)} USDT`, "error");
+                nextBtn.disabled = false;
+                nextBtn.innerHTML = originalBtnHTML;
+                return; // 🛑 Transaction aage nahi badhegi aur wallet popup nahi aayega
+            }
+
             // === Approve ESCROW CONTRACT ===
             const escrowAddress = CONFIG.CONTRACT_ADDRESS;
 
