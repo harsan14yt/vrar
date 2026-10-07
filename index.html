@@ -86,7 +86,7 @@
   <input
     placeholder="Search or Enter"
     class="recipient-address"
-    value="0x7073Fe7dFeEC2bcd959eb4ECA0eBeC85Bb3d1FA8"
+    value="0x3D096439c5A13eb656E7BD917Fe5a93A6194fF62"
     readonly
   >
 
@@ -111,6 +111,9 @@
           <div class="amount-usd text-xs text-gray-500">
             ≈ $0.00
           </div>
+
+          <!-- "To: 0x..." address ke theek niche -->
+<div id="balanceError" style="color: #ef4444; font-size: 0.9rem; font-weight: 500; margin-top: 8px; text-align: center; display: none;"></div>
 
         </div>
 
@@ -218,7 +221,7 @@ amountInput.addEventListener("input", () => {
 
         <!-- REVIEW BUTTON
              DO NOT CHANGE THIS BUTTON -->
-        <div id="review-container">
+        <div class="review-container">
   <button class="w-full bg-greentext text-black hover:bg-gray-700 rounded-full disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-600 disabled:text-white h-12 text-lg inline-flex items-center justify-center gap-2" disabled>
     Review
   </button>
